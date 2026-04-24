@@ -1,4 +1,4 @@
-# ⛈ thundertype
+# ⛈ Thundertype
 
 **Your keyboard sounds like a thunderstorm.**
 
