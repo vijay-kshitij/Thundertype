@@ -1,0 +1,5 @@
+thundertype
+thundertype-arm64
+thundertype-amd64
+*.exe
+.DS_Store
