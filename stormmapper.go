@@ -53,7 +53,7 @@ func MapWPMToStorm(wpm float64, idleSec float64) StormLevel {
 	level.Intensity = raw * idleFade
 
 	// Light rain floor — ambient rain that persists after typing begins
-	const lightRainFloor = 0.35
+	const lightRainFloor = 0.45
 
 	switch {
 	case level.Intensity < 0.05:
