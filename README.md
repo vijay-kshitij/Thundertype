@@ -2,13 +2,13 @@
 
 **Your keyboard sounds like a thunderstorm.**
 
-Type slowly — gentle rain. Type faster — the storm builds. Stop typing — silence returns. Thunder cracks at peak speed.
+Type slowly — gentle rain. Type faster — the storm builds. Stop typing — it settles to a soft rain ambience. Thunder cracks at peak speed.
 
 ## Install
 
 ```bash
 # Clone the repo
-git clone https://github.com/YOUR_GITHUB_USERNAME/thundertype.git
+git clone https://github.com/vijay-kshitij/thundertype.git
 cd thundertype
 
 # Download dependencies
@@ -54,16 +54,16 @@ make run
 
 | Typing Speed | Experience |
 |---|---|
-| Idle (4s+) | Silence |
+| Idle (4s+) | Light rain ambience |
 | 1-20 WPM | Light rain patter |
 | 20-40 WPM | Rain picks up |
-| 40-60 WPM | Medium rain, wind |
+| 40-60 WPM | Medium rain |
 | 60-90 WPM | Heavy rain, thunder starts |
 | 90-120+ WPM | Full storm |
 
 ## Audio
 
-Place your MP3 files in `audio/storm/`:
+MP3 files are embedded into the binary at compile time from `audio/storm/`:
 
 ```
 audio/storm/
@@ -76,7 +76,7 @@ audio/storm/
 └── thunder_04.mp3     ← heavy thunder
 ```
 
-Rain files loop seamlessly. Thunder files play as one-shots at high typing speeds.
+Rain files loop seamlessly. Thunder files play as one-shots at high typing speeds. To use different audio, replace the files and rebuild.
 
 ## License
 
