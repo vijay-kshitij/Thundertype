@@ -1,12 +1,15 @@
 # ⛈ Thundertype
 
+**Your keyboard sounds like a thunderstorm.**
+
+Type slowly — gentle rain. Type faster — the storm builds. Stop typing — it settles to a soft rain ambience. Thunder cracks at peak speed.
+
+## Demo Video [🔈 SOUND ON]
 
 https://github.com/user-attachments/assets/c669da94-58d8-49a2-ae35-094c2628a27b
 
 
-**Your keyboard sounds like a thunderstorm.**
 
-Type slowly — gentle rain. Type faster — the storm builds. Stop typing — it settles to a soft rain ambience. Thunder cracks at peak speed.
 
 ## Install
 
