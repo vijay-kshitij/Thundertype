@@ -13,76 +13,91 @@ type StormLevel struct {
 
 // MapWPMToStorm converts typing speed and idle time to a storm description.
 //
-// The mapping:
+// idleSec = -1 means the user has never typed since startup → total silence.
+// Otherwise, idleSec is seconds since the last keystroke.
 //
-//	0 WPM (idle 4s+)   → silence
-//	1-20 WPM            → light rain
-//	20-40 WPM           → light + medium rain crossfade
-//	40-60 WPM           → medium rain dominant
-//	60-90 WPM           → heavy rain, occasional thunder
-//	90-120+ WPM         → full storm, frequent thunder
+// The mapping once typing has begun:
+//
+//	Never typed        → silence
+//	Idle 4s+           → light rain (calming ambience)
+//	1-20 WPM           → light rain growing
+//	20-40 WPM          → light + medium rain crossfade
+//	40-60 WPM          → medium rain dominant
+//	60-90 WPM          → heavy rain, occasional thunder
+//	90-120+ WPM        → full storm, frequent thunder
 func MapWPMToStorm(wpm float64, idleSec float64) StormLevel {
 	var level StormLevel
 
+	// ── SILENCE BEFORE FIRST KEYSTROKE ──
+	// If the user hasn't typed yet, play nothing. The storm only begins
+	// after they start interacting.
+	if idleSec < 0 {
+		level.RainVolume = [3]float64{0, 0, 0}
+		return level
+	}
+
 	// ── IDLE FADE ──
-	// When you stop typing, the storm fades over ~3 seconds.
+	// When you stop typing, the storm calms down over ~3 seconds.
+	// After that, it settles to a gentle light rain ambience — because
+	// once you've started typing, the "atmosphere" should persist.
 	// 0-1s idle: full intensity (keep the vibe going briefly)
-	// 1-4s idle: fading
-	// 4s+ idle:  silent
+	// 1-4s idle: fading toward the light rain floor
+	// 4s+ idle:  steady light rain, peaceful background
 	idleFade := 1.0
 	if idleSec > 1.0 {
 		idleFade = math.Max(0, 1.0-(idleSec-1.0)/3.0)
 	}
 
 	// ── NORMALIZE WPM TO 0-1 ──
-	// 0 WPM = 0.0, 120+ WPM = 1.0
 	raw := math.Min(wpm/120.0, 1.0)
 	level.Intensity = raw * idleFade
 
-	// ── MAP INTENSITY TO AUDIO LAYERS ──
+	// Light rain floor — ambient rain that persists after typing begins
+	const lightRainFloor = 0.35
+
 	switch {
 	case level.Intensity < 0.05:
-		// Silence — not typing or barely typing
-		level.RainVolume = [3]float64{0, 0, 0}
+		// Idle (but has typed before) — steady light rain floor
+		level.RainVolume = [3]float64{lightRainFloor, 0, 0}
 
 	case level.Intensity < 0.25:
-		// Light rain only — gentle patter
+		// Light rain only — grows from floor to full
 		level.RainVolume = [3]float64{
-			level.Intensity * 4, // light rain: 0 → 1.0
-			0,                   // no medium
-			0,                   // no heavy
+			math.Max(lightRainFloor, level.Intensity*4),
+			0,
+			0,
 		}
 
 	case level.Intensity < 0.50:
 		// Light fading, medium rising — rain picking up
-		t := (level.Intensity - 0.25) / 0.25 // t goes 0→1 in this range
+		t := (level.Intensity - 0.25) / 0.25
 		level.RainVolume = [3]float64{
-			1.0 - t*0.5, // light fades to 0.5
-			t,            // medium rises to 1.0
-			0,            // no heavy yet
+			1.0 - t*0.5,
+			t,
+			0,
 		}
 
 	case level.Intensity < 0.75:
 		// All three layers, thunder starts — proper storm
 		t := (level.Intensity - 0.50) / 0.25
 		level.RainVolume = [3]float64{
-			0.3,          // light stays as ambience
-			1.0 - t*0.3,  // medium fades slightly
-			t * 0.7,      // heavy rising
+			0.3,
+			1.0 - t*0.3,
+			t * 0.7,
 		}
 		level.CanThunder = true
-		level.ThunderProb = t * 0.1 // up to 10% per tick
+		level.ThunderProb = t * 0.1
 
 	default:
 		// Full storm — maximum intensity
 		t := (level.Intensity - 0.75) / 0.25
 		level.RainVolume = [3]float64{
-			0.2,          // light barely audible
-			0.5,          // medium half volume
-			0.8 + t*0.2,  // heavy nearly full
+			0.2,
+			0.5,
+			0.8 + t*0.2,
 		}
 		level.CanThunder = true
-		level.ThunderProb = 0.1 + t*0.15 // 10-25% per tick
+		level.ThunderProb = 0.1 + t*0.15
 	}
 
 	return level

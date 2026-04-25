@@ -1,4 +1,4 @@
-# ⛈ thundertype
+# ⛈ Thundertype
 
 **Your keyboard sounds like a thunderstorm.**
 
@@ -8,7 +8,7 @@ Type slowly — gentle rain. Type faster — the storm builds. Stop typing — s
 
 ```bash
 # Clone the repo
-git clone https://github.com/yourname/thundertype.git
+git clone https://github.com/YOUR_GITHUB_USERNAME/thundertype.git
 cd thundertype
 
 # Download dependencies
@@ -34,15 +34,14 @@ Add your terminal app (Terminal.app or iTerm) to the list, then restart thundert
 
 ## Usage
 
+After building with `make run`, start typing anywhere on your Mac — in your editor, browser, terminal, anywhere. The storm responds to your typing speed globally.
+
+To run it again later:
+
 ```bash
-# Default storm mode
-thundertype
-
-# Or during development
-make dev
+cd thundertype
+make run
 ```
-
-Type anywhere on your Mac — in your editor, browser, terminal, anywhere. The storm responds to your typing speed globally.
 
 **Ctrl+C** to quit.
 

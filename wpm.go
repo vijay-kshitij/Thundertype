@@ -9,10 +9,12 @@ import (
 // It's thread-safe — the key listener goroutine writes to it,
 // and the main loop goroutine reads from it.
 type WPMEngine struct {
-	mu         sync.Mutex
-	timestamps []int64       // millisecond timestamps of keyDown events
-	windowSize time.Duration // how far back we look (e.g. 5 seconds)
-	currentWPM float64
+	mu          sync.Mutex
+	timestamps  []int64       // millisecond timestamps of keyDown events
+	windowSize  time.Duration // how far back we look (e.g. 5 seconds)
+	currentWPM  float64
+	everTyped   bool  // has the user typed since startup?
+	lastKeyTime int64 // last keystroke time (persists even after window prune)
 }
 
 // NewWPMEngine creates a WPM calculator.
@@ -29,6 +31,10 @@ func NewWPMEngine(window time.Duration) *WPMEngine {
 func (w *WPMEngine) RecordKeystroke(ts int64) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
+
+	// Mark that the user has started typing
+	w.everTyped = true
+	w.lastKeyTime = ts
 
 	// Add this timestamp
 	w.timestamps = append(w.timestamps, ts)
@@ -74,11 +80,12 @@ func (w *WPMEngine) GetWPM() float64 {
 }
 
 // IdleTime returns seconds since the last keystroke.
+// Returns -1 if the user has never pressed a key since startup.
 func (w *WPMEngine) IdleTime() float64 {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	if len(w.timestamps) == 0 {
-		return 999 // very idle
+	if !w.everTyped {
+		return -1 // never typed — signal to stay silent
 	}
-	return float64(time.Now().UnixMilli()-w.timestamps[len(w.timestamps)-1]) / 1000.0
+	return float64(time.Now().UnixMilli()-w.lastKeyTime) / 1000.0
 }
